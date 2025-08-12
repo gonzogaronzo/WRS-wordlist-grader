@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WRS Word List Grading Tool</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
@@ -32,7 +32,7 @@
     </section>
 
     <section id="wordListContainer" class="word-list-container">
-      <!-- Word rows will be injected here -->
+      <!-- Word rows get injected here -->
     </section>
 
     <section class="submit-section">
@@ -41,6 +41,7 @@
     </section>
   </main>
 
-  <script src="app.js"></script>
+  <!-- Cache-bust JS so the newest app.js is always fetched -->
+  <script src="app.js?v=2"></script>
 </body>
 </html>
