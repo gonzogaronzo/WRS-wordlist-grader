@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WRS Word List Grading Tool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Wilson Reading System® – Word List Grading Tool</h1>
+  </header>
+
+  <main>
+    <section class="controls">
+      <div class="control-group">
+        <label for="stepSelect">Step:</label>
+        <select id="stepSelect"></select>
+      </div>
+      <div class="control-group">
+        <label for="substepSelect">Substep:</label>
+        <select id="substepSelect"></select>
+      </div>
+      <div class="control-group">
+        <label for="listSelect">List:</label>
+        <select id="listSelect"></select>
+      </div>
+      <div class="control-group">
+        <label for="studentSelect">Student&nbsp;ID:</label>
+        <select id="studentSelect"></select>
+      </div>
+    </section>
+
+    <section id="wordListContainer" class="word-list-container">
+      <!-- Word rows will be injected here -->
+    </section>
+
+    <section class="submit-section">
+      <button id="submitButton" class="submit-btn">Submit</button>
+      <p id="message" class="message"></p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
