@@ -1,20 +1,17 @@
 /*
- * Client‑side logic for the WRS Word List Grading Tool.
+ * Client-side logic for the WRS Word List Grading Tool.
  *
  * This script loads a structured JSON file containing the word lists
  * broken down by step, substep and list letter. It builds dynamic
- * drop‑downs for the teacher to select the appropriate list and
+ * drop-downs for the teacher to select the appropriate list and
  * student, displays each word with an incorrect toggle and optional
  * notes field, and submits the results to a Google Sheet via a
  * configurable Apps Script endpoint.
  */
 
 (() => {
-  // Replace this URL with the URL of your published Google Apps Script
-  // Web App. See the documentation in README.md for details on how
-  // to create and deploy a script. Without a valid URL, the submit
-  // button will simply log the collected data to the console.
-  const POST_URL = 'YOUR_APPS_SCRIPT_WEBAPP_URL';
+  // Replace this URL with the URL of your published Google Apps Script Web App
+  const POST_URL = 'https://script.google.com/macros/s/AKfycbzXrTTFqbi8Z-an34iIISCS3HD9nJqjChf1moLPxQiqJOaweANPUxHZ4T-SpzAhgQ91bg/exec';
 
   let wordData = {};
 
@@ -45,7 +42,6 @@
     submitButton.addEventListener('click', submitData);
   });
 
-  // Populate the step drop‑down based on keys in the JSON
   function populateSteps() {
     stepSelect.innerHTML = '<option value="">– Select Step –</option>';
     const steps = Object.keys(wordData).sort((a, b) => Number(a) - Number(b));
@@ -55,23 +51,19 @@
       option.textContent = step;
       stepSelect.appendChild(option);
     });
-    // Reset substeps and lists
     substepSelect.innerHTML = '<option value="">– Select Substep –</option>';
     listSelect.innerHTML = '<option value="">– Select List –</option>';
     wordListContainer.innerHTML = '';
   }
 
-  // Populate the substep drop‑down whenever the step changes
   function onStepChange() {
     const step = stepSelect.value;
     substepSelect.innerHTML = '<option value="">– Select Substep –</option>';
     listSelect.innerHTML = '<option value="">– Select List –</option>';
     wordListContainer.innerHTML = '';
-    if (!step || !wordData[step]) {
-      return;
-    }
+    if (!step || !wordData[step]) return;
+
     const substeps = Object.keys(wordData[step]).sort((a, b) => {
-      // Sort by numeric portion then by decimal
       const [aMain, aSub] = a.split('.').map(Number);
       const [bMain, bSub] = b.split('.').map(Number);
       if (aMain === bMain) return aSub - bSub;
@@ -85,15 +77,13 @@
     });
   }
 
-  // Populate the list drop‑down when the substep changes
   function onSubstepChange() {
     const step = stepSelect.value;
     const substep = substepSelect.value;
     listSelect.innerHTML = '<option value="">– Select List –</option>';
     wordListContainer.innerHTML = '';
-    if (!step || !substep || !wordData[step] || !wordData[step][substep]) {
-      return;
-    }
+    if (!step || !substep || !wordData[step] || !wordData[step][substep]) return;
+
     const lists = Object.keys(wordData[step][substep]).sort();
     lists.forEach(l => {
       const option = document.createElement('option');
@@ -103,48 +93,45 @@
     });
   }
 
-  // Display the selected word list on the page
   function showWords() {
     const step = stepSelect.value;
     const substep = substepSelect.value;
     const listId = listSelect.value;
     wordListContainer.innerHTML = '';
     messageEl.textContent = '';
-    if (!step || !substep || !listId || !wordData[step] || !wordData[step][substep] || !wordData[step][substep][listId]) {
-      return;
-    }
+    if (!step || !substep || !listId || !wordData[step]?.[substep]?.[listId]) return;
+
     const words = wordData[step][substep][listId];
     words.forEach((word, idx) => {
       const row = document.createElement('div');
       row.className = 'word-row';
-      // Word label
+
       const span = document.createElement('span');
       span.className = 'word-text';
       span.textContent = word;
       row.appendChild(span);
-      // Checkbox for incorrect
+
       const chk = document.createElement('input');
       chk.type = 'checkbox';
       chk.id = `chk-${idx}`;
       chk.className = 'incorrect-checkbox';
-      // Label for checkbox
+
       const chkLabel = document.createElement('label');
       chkLabel.htmlFor = chk.id;
       chkLabel.className = 'incorrect-label';
       chkLabel.textContent = 'Incorrect';
-      // Notes input
+
       const notes = document.createElement('input');
       notes.type = 'text';
       notes.placeholder = 'Pronunciation (optional)';
       notes.className = 'notes-input';
       notes.disabled = true;
-      // When checkbox toggles, enable or disable notes
+
       chk.addEventListener('change', () => {
         notes.disabled = !chk.checked;
-        if (!chk.checked) {
-          notes.value = '';
-        }
+        if (!chk.checked) notes.value = '';
       });
+
       row.appendChild(chk);
       row.appendChild(chkLabel);
       row.appendChild(notes);
@@ -152,7 +139,6 @@
     });
   }
 
-  // Populate student IDs 1–30 by default; modify as needed
   function populateStudents() {
     studentSelect.innerHTML = '<option value="">– Select Student –</option>';
     for (let i = 1; i <= 30; i++) {
@@ -163,7 +149,6 @@
     }
   }
 
-  // Gather the form data and submit it to the Apps Script
   function submitData() {
     const step = stepSelect.value;
     const substep = substepSelect.value;
@@ -173,7 +158,7 @@
       messageEl.textContent = 'Please select a step, substep, list and student before submitting.';
       return;
     }
-    // Gather word results
+
     const rows = wordListContainer.querySelectorAll('.word-row');
     const results = [];
     rows.forEach(row => {
@@ -186,6 +171,7 @@
         notes: notes.value.trim()
       });
     });
+
     const payload = {
       timestamp: new Date().toISOString(),
       step,
@@ -194,15 +180,10 @@
       student_id: studentId,
       word_list: results
     };
+
     submitButton.disabled = true;
     messageEl.textContent = 'Submitting…';
-    // If POST_URL is not replaced, just log the payload
-    if (!POST_URL || POST_URL === 'YOUR_APPS_SCRIPT_WEBAPP_URL') {
-      console.log('Submission payload:', payload);
-      messageEl.textContent = 'Data collected (see browser console). Please configure POST_URL to send to Google Sheets.';
-      submitButton.disabled = false;
-      return;
-    }
+
     fetch(POST_URL, {
       method: 'POST',
       mode: 'cors',
