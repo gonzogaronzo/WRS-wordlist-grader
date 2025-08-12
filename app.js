@@ -10,7 +10,7 @@
  */
 
 (() => {
-  // Replace this URL with the URL of your published Google Apps Script Web App
+  // ✅ Replace this with your published Google Apps Script Web App URL
   const POST_URL = 'https://script.google.com/macros/s/AKfycbzXrTTFqbi8Z-an34iIISCS3HD9nJqjChf1moLPxQiqJOaweANPUxHZ4T-SpzAhgQ91bg/exec';
 
   let wordData = {};
@@ -69,6 +69,7 @@
       if (aMain === bMain) return aSub - bSub;
       return aMain - bMain;
     });
+
     substeps.forEach(ss => {
       const option = document.createElement('option');
       option.value = ss;
@@ -99,8 +100,9 @@
     const listId = listSelect.value;
     wordListContainer.innerHTML = '';
     messageEl.textContent = '';
-    if (!step || !substep || !listId || !wordData[step]?.[substep]?.[listId]) return;
-
+    if (!step || !substep || !listId || !wordData[step] || !wordData[step][substep] || !wordData[step][substep][listId]) {
+      return;
+    }
     const words = wordData[step][substep][listId];
     words.forEach((word, idx) => {
       const row = document.createElement('div');
@@ -154,6 +156,7 @@
     const substep = substepSelect.value;
     const listId = listSelect.value;
     const studentId = studentSelect.value;
+
     if (!step || !substep || !listId || !studentId) {
       messageEl.textContent = 'Please select a step, substep, list and student before submitting.';
       return;
@@ -183,6 +186,13 @@
 
     submitButton.disabled = true;
     messageEl.textContent = 'Submitting…';
+
+    if (!POST_URL) {
+      console.log('Submission payload:', payload);
+      messageEl.textContent = 'Data collected (see browser console). Please configure POST_URL to send to Google Sheets.';
+      submitButton.disabled = false;
+      return;
+    }
 
     fetch(POST_URL, {
       method: 'POST',
